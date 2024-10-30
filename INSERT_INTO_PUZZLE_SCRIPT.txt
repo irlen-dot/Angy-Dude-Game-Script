@@ -1,0 +1,439 @@
+(
+Hello there! 
+
+This code is the intellectual property of The Studio "Almaty Guys",
+which is will be officialy opened soon; At least really hope so. The 
+studio has one employee by now, Irlen Turlykhanov.
+
+© Almaty Guys. Almaty, 0500060. 2024
+
+P.S. All comments are written by hand
+)
+
+title Angry Dude
+author Irlen Turlykhanov "Almaty Guys" and Alexey Voyalkin
+homepage auroriax.github.io/PuzzleScript
+
+tween_length 0.03
+smoothscreen 5x5
+level_select
+runtime_metadata_twiddling
+text_controls "X" is the key to hit. WASD and arrows to move 
+realtime_interval 0.5
+( key_repeat_interval 0.12 )
+
+========
+OBJECTS
+========
+
+( 
+	This block is basically the "modeling" of the sprites.
+    The design of how they appear in the game
+)
+
+Background 
+LIGHTGRAY GRAY
+00010
+11111
+01000
+11111
+00010
+
+NextLevel1 copy:Background
+LIGHTGRAY GRAY
+
+NextLevel2 copy:Background
+LIGHTGRAY GRAY
+
+NextLevel3 copy:Background
+LIGHTGRAY GRAY
+
+( It copies the structure of the background block, but it changes the colors, to make it more Darker )
+Wall copy:Background
+DARKGRAY BLACK
+
+
+Player 
+black red
+0...0
+10.01
+.....
+.000.
+0...0
+
+Key
+yellow
+.....
+.0...
+0.000
+.0..0
+.....
+
+Door
+brown #732818 black
+00002
+01102
+00002
+01102
+00002
+
+OpenedDoor
+brown #732818 black gray
+33302
+33302
+33302
+33302
+33302
+
+Hammer
+black brown
+00000
+00000
+..1..
+..1..
+..1..
+
+Glass
+#a2f7fa white
+01010
+10100
+00000
+01001
+10010
+
+BrokenGlass
+#a2f7fa white gray
+01012
+12201
+02220
+12211
+10010
+
+Guy
+black #efd59e white 
+.111.
+.111.
+22222
+20002
+00.00
+
+BlueGuy
+black #efd59e blue
+.111.
+.111.
+22222
+20002
+00.00
+
+
+BloodStains1
+red #731609
+.....
+.....
+.00..
+..0..
+.....
+
+BloodStains2
+red #731609
+.....
+.....
+.001.
+.00..
+.....
+
+BloodStains3
+red #731609
+..1..
+.1.0.
+0001.
+.000.
+.....
+
+BloodStains4
+red #731609
+.11..
+0101.
+.0001
+.000.
+0.0..
+
+Shelve
+brown #732818 black
+.000.
+01110
+02220
+00000
+02.20
+
+ShelveWithHammer
+brown #732818 black
+.000.
+01110
+02220
+00000
+02.20
+
+BrokenShelve
+brown #732818 black
+02220
+02220
+02220
+0.00.
+02.20
+
+
+=======
+LEGEND
+=======
+
+( 
+	The legend is how the markup will work in the map.
+    The map is just a matrix 'arrays in arrays, basically',
+    which holds the order of these symbols.
+)
+. = Background
+@ = Guy
+* = BloodStains1
+** = BloodStains2
+*** = BloodStains3
+**** = BloodStains4
+P = Player
+% = Key
+D = Door
+G = Glass
+# = Wall
+! = BlueGuy
+S = Shelve
+B = BrokenShelve
+H = Hammer
+T = BrokenGlass
+N = NextLevel1
+M = NextLevel2
+Z = NextLevel3
+Y = ShelveWithHammer
+
+=======
+SOUNDS
+=======
+
+( 
+	The most headache brought me the part with sounds,
+    Because it appeared that the sounds are created in
+    an algorithimacal way. I did not have enough time
+    to understand the format, however I will want
+    Claude to generate some sounds, and I will
+    leave a linked of my forked project in
+    my next commits
+)
+
+Guy destroy 94125104
+BlueGuy destroy 94125104
+Key create 46678700
+Player action 92858704
+BrokenShelve create 92858704
+Glass destroy 78409108
+Hammer create 8874904
+
+================
+COLLISIONLAYERS
+================
+
+Background
+Player, Door, Hammer, Glass, Wall, Key, Shelve, Guy, BlueGuy, Hammer, ShelveWithHammer
+OpenedDoor
+BloodStains1
+BloodStains2
+BloodStains3
+BloodStains4
+BrokenGlass
+NextLevel1
+NextLevel2
+NextLevel3
+BrokenShelve
+
+======
+RULES
+======     
+
+
+late [Player | Guy] -> [Player | BloodStains1]
+
+
+late [Player | BlueGuy ]-> [Player BloodStains1 | Background Key ]
+
+
+[action Player | Shelve ] -> [Player | BrokenShelve]
+
+
+[action Player | ShelveWithHammer] -> [Player | BrokenShelve Hammer]
+
+
+
+
+( This is a block to animate the blood stains )
+
+[  BloodStains1 ] -> [ BloodStains2 ]
+[  BloodStains2 ] -> [ BloodStains3 ]
+[  BloodStains3 ] -> [ BloodStains4 ] 
+
+
+( 
+	Guys, so this is the code to move the key together with the player.
+    It is written like this because I can not create a function with a
+    direction argument, so enjoy this shitty code
+)
+[ ^ Player | Key ] -> [ ^ Player | ^ Key ]
+[ v Player | Key ] -> [ v Player | v Key ]
+[ > Player | Key ] -> [ > Player | > Key ]
+[ < Player | Key ] -> [ < Player | < Key ]
+
+[action Player | Key | no Wall no Shelve no ShelveWithHammer no Guy no BlueGuy] -> [Player | . | Key] 
+[action Player | Hammer | no Wall no Shelve no ShelveWithHammer no Guy no BlueGuy] -> [Player | . | Hammer]
+
+( 
+	Guys, so this is the code to move the key together with the player.
+    It is written like this because I can not create a function with a
+    direction argument, so enjoy this shitty code
+)
+[ ^ Player | Hammer ] -> [ ^ Player | ^ Hammer ]
+[ v Player | Hammer ] -> [ v Player | v Hammer ]
+[ > Player | Hammer ] -> [ > Player | > Hammer ]
+[ < Player | Hammer ] -> [ < Player | < Hammer ]
+
+(
+	This is the code to open doors and break glass
+)
+[ Door | Key ] -> [ OpenedDoor | . ]
+[Glass | Hammer ] -> [ BrokenGlass | . ]
+
+
+[ > Player | . | Guy ] -> [ > Player | . | > Guy ] 
+[ > Player | . | BlueGuy ] -> [ > Player | . | > BlueGuy ]
+
+[ Player | NextLevel1 ] -> GOTO Level_2
+[ Player | NextLevel2 ] -> GOTO Level_3
+[ Player | NextLevel3 ] -> GOTO Outro
+
+==============
+WINCONDITIONS
+==============
+
+no Guy on Background
+no BlueGuy on Background
+
+=======     
+LEVELS
+=======
+
+section Intro
+
+message Hi, Game and Play class
+message You are playing for an Angry Dude.
+message Just Kill Everyone.
+
+
+section Level 1
+.............nnn.............
+.############ggg############.
+.#......#..s#...#!...@.....#.
+.#..@.###...#...#s.....#...#.
+.#....#.....#...########...#.
+.#.####..@..#...#..........#.
+.#.......................@.#.
+.############...############.
+.#..y..g....#...#y.d.......#.
+.#.p...g....#...#..#.......#.
+.#.....g....#...####.......#.
+.#.#####...................#.
+.#.#..s#....#...####.###.###.
+.#...###....#...#s.....#..@#.
+.############...############.
+.#@..#ss#..@#........@.....#.
+.##.##..##.##...#..@.......#.
+.#..........#...#......@..@#.
+.#..............#...@......#.
+.###########################.
+.............................
+
+
+
+section Level_2
+
+message Bro, why are you so angry?
+message Chill, Bro, you killed everyone there.
+
+#############################
+#############################
+#####.......................#
+##.....@.....########...##..#
+##.....#.....#s.....#...#...#
+#s...@#s#@...#!.....#...#...#
+#s.....#.....#####..#...#...#
+##..................#...#s@.#
+######################.######
+#..sss#.......@.....d........
+#s....#..############.......p
+#s..@.#..#.@........#........
+#s.......#...@......#........
+#######..#......#############
+#####.g..#.@....#@..........#
+####..#..#......#...######..#
+###..##..#####..#....@..y#.@#
+##..###......#..#.@......#..#
+#..####..@...#@.##########..#
+#@#####......#..............#
+#######...........@....@....#
+#############################
+
+
+section Level_3
+
+message Bruh, go to a mental hospital or something?
+message Bro, like seriously, you killed my parents, just chill bro
+
+p..#s....#.#..#y........
+#..#..#..#.@..#!........
+##....#..#.@..########..
+#######..#.#.........#..
+.........#.#.........#..
+..########.#..#####..#..
+..#.d....@.#..#s..#..#..
+..#.#####..#..#.@....#.#
+..#....y#..#..#s.....#.#
+..#..@..#..#..########.#
+..#######..#...........#
+...........#...........#
+############..########.#
+zg............#@.......#
+zg............#........#
+
+section Outro
+
+message I Kinda Got A Little Angry.
+message Everything's fine right now.
+( ######### )
+( #.......# )
+( #.....@.# )
+( #.P.*.O.# )
+( #.......# )
+( #.......# )
+( ######### )
+
+( section Level 2 )
+( ######### )
+( #.......# )
+( #..o....# )
+( #.o...*.# )
+( #....*p## )
+( #.....### )
+( ######### )
+
+( section Level 3 )
+( ######### )
+( #.......# )
+( ##..o.#.# )
+( #.*.p.*.# )
+( #.#.o.#.# )
+( #.......# )
+( ######### )
